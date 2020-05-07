@@ -173,7 +173,7 @@ void RegisterPID(void);
 
 void selectLoop(void);
 
-void log(int i, int coSe, int result);
+void my_log(int i, int coSe, int result);
 
 int getAddress(char *host, struct in_addr *iaddr);
 
@@ -865,7 +865,7 @@ void handleRemoteWrite(int i)
 		reClosed[i] = 1;
 		coClosed[i] = 1;
 		PERROR("rinetd: local closed and no more output");
-		log(i, coSe[i], logDone | coLog[i]); 
+		my_log(i, coSe[i], logDone | coLog[i]);
 		closesocket(reFds[i]);
 		return;
 	}
@@ -921,7 +921,7 @@ void handleLocalWrite(int i)
 		loClosed[i] = 1;
 		coClosed[i] = 1;
 		PERROR("remote closed and no more input");
-		log(i, coSe[i], logDone | coLog[i]);
+		my_log(i, coSe[i], logDone | coLog[i]);
 		closesocket(loFds[i]);
 		return;
 	}
@@ -946,7 +946,11 @@ void handleLocalWrite(int i)
 
 void handleCloseFromLocal(int i)
 {
+#ifndef LINUX 
+#ifndef WIN32
 	int arg;
+#endif /* WIN32 */
+#endif /* LINUX */
 	coClosing[i] = 1;
 	/* The local end fizzled out, so make sure
 		we're all done with that */
@@ -972,7 +976,11 @@ void handleCloseFromLocal(int i)
 
 void handleCloseFromRemote(int i)
 {
+#ifndef LINUX
+#ifndef WIN32
 	int arg;
+#endif /* WIN32 */
+#endif /* LINUX */
 	coClosing[i] = 1;
 	/* The remote end fizzled out, so make sure
 		we're all done with that */
@@ -1013,7 +1021,7 @@ void handleAccept(int i)
 	addrlen = sizeof(addr);
 	nfd = accept(seFds[i], &addr, &addrlen);
 	if (nfd == INVALID_SOCKET) {
-		log(-1, i, logAcceptFailed);
+		my_log(-1, i, logAcceptFailed);
 		return;
 	}
 #ifndef WIN32
@@ -1242,7 +1250,7 @@ void openLocalFd(int se, int i)
 		reClosed[i] = 1;
 		loClosed[i] = 1;
 		coClosed[i] = 1;	
-		log(i, coSe[i], logLocalSocketFailed);
+		my_log(i, coSe[i], logLocalSocketFailed);
 		return;
 	}
 #ifndef WIN32
@@ -1260,7 +1268,7 @@ void openLocalFd(int se, int i)
 		reClosed[i] = 1;
 		loClosed[i] = 1;
 		coClosed[i] = 1;	
-		log(i, coSe[i], logLocalBindFailed);
+		my_log(i, coSe[i], logLocalBindFailed);
 		return;
 	}
 	memset(&saddr, 0, sizeof(struct sockaddr_in));
@@ -1290,7 +1298,7 @@ void openLocalFd(int se, int i)
 			reClosed[i] = 1;
 			loClosed[i] = 1;
 			coClosed[i] = 1;	
-			log(i, coSe[i], logLocalConnectFailed);
+			my_log(i, coSe[i], logLocalConnectFailed);
 			return;
 		}
 	}
@@ -1357,7 +1365,9 @@ int safeRealloc(void **data, int oldsize, int newsize)
 
 void RegisterPID(void)
 {
+#if	defined(LINUX)
 	FILE *pid_file;
+#endif	/* LINUX */
 	char *pid_file_name = "/var/run/rinetd.pid";
 	if (pidLogFileName) {
 		pid_file_name = pidLogFileName;
@@ -1381,7 +1391,7 @@ unsigned char nullAddress[4] = { 0, 0, 0, 0 };
 
 struct tm *get_gmtoff(int *tz);
 
-void log(int i, int coSe, int result)
+void my_log(int i, int coSe, int result)
 {
 	unsigned char *reAddress;
 	int bytesOutput;
@@ -1392,9 +1402,9 @@ void log(int i, int coSe, int result)
 	struct tm *t;
 	char tstr[1024];
 	char sign;
-	if (!log) {
-		return;
-	}
+	// if (!log) {
+	// 	return;
+	// }
 	t = get_gmtoff(&timz);
 	sign = (timz < 0 ? '-' : '+');
 	if (timz < 0) {
@@ -1551,7 +1561,7 @@ void refuse(int index, int logCode)
 	reClosed[index] = 1;
 	loClosed[index] = 1;
 	coClosed[index] = 1;	
-	log(index, coSe[index], logCode);
+	my_log(index, coSe[index], logCode);
 }
 
 void term(int s)

@@ -58,6 +58,10 @@
 #include <stdlib.h>
 #endif	/* GNU C library.  */
 
+#ifdef WIN32
+#include <string.h>
+#endif
+
 /* If GETOPT_COMPAT is defined, `+' as well as `--' can introduce a
    long-named option.  Because this is not POSIX.2 compliant, it is
    being phased out.  */
