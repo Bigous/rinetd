@@ -1,3 +1,6 @@
 *.o
 *.exe
 rinetd
+UpgradeLog.htm
+Debug
+Release
